@@ -1,127 +1,168 @@
 import React, { useState } from 'react';
 import '../Checklist.css';
 
-
 const Checklist = () => {
-  const [items, setItems] = useState([]);
-  const [newItem, setNewItem] = useState('');
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [deleteIndex, setDeleteIndex] = useState(null);
-  const [showResetConfirmation, setShowResetConfirmation] = useState(false);
+  const [checklists, setChecklists] = useState([]);
+  const [currentChecklist, setCurrentChecklist] = useState('');
+  const [newItemText, setNewItemText] = useState([]);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState([]);
+  const [showResetConfirmation, setShowResetConfirmation] = useState([]);
+  const [currentItemIndex, setCurrentItemIndex] = useState(null);
 
-  const addItem = () => {
-    if (newItem.trim() !== '') {
-      setItems([...items, { text: newItem, checked: false }]);
-      setNewItem('');
+  const addChecklist = () => {
+    if (currentChecklist.trim() !== '') {
+      setChecklists([...checklists, { name: currentChecklist, items: [] }]);
+      setCurrentChecklist('');
+      setShowDeleteConfirmation([...showDeleteConfirmation, false]);
+      setShowResetConfirmation([...showResetConfirmation, false]);
     }
   };
 
-  const showDeletePopup = (index) => {
-    setDeleteIndex(index);
-    setShowDeleteConfirmation(true);
-  };
-
-  const hideDeletePopup = () => {
-    setShowDeleteConfirmation(false);
-  };
-
-  const deleteItem = () => {
-    const updatedItems = [...items];
-    updatedItems.splice(deleteIndex, 1);
-    setItems(updatedItems);
-    hideDeletePopup();
-  };
-
-  const toggleItem = (index) => {
-    const updatedItems = [...items];
-    updatedItems[index].checked = !updatedItems[index].checked;
-    setItems(updatedItems);
-  
-    // Reset the reset confirmation state
-    hideResetPopup();
-  };
-  
-  
-
-  const showResetPopup = () => {
-    setShowResetConfirmation(true);
-  };
-
-  const hideResetPopup = () => {
-    setShowResetConfirmation(false);
-  };
-
-  const resetItems = () => {
-    const checkedItems = items.some((item) => item.checked);
-    if (checkedItems) {
-      const updatedItems = items.map((item) => {
-        item.checked = false;
-        return item;
+  const addItem = (checklistIndex) => {
+    if (newItemText[checklistIndex].trim() !== '') {
+      const updatedChecklists = [...checklists];
+      updatedChecklists[checklistIndex].items.push({ text: newItemText[checklistIndex], checked: false });
+      setChecklists(updatedChecklists);
+      setNewItemText((prev) => {
+        const updatedText = [...prev];
+        updatedText[checklistIndex] = '';
+        return updatedText;
       });
-      setItems(updatedItems);
     }
-    hideResetPopup();
   };
-  
-  
+
+  const toggleItem = (checklistIndex, itemIndex) => {
+    const updatedChecklists = [...checklists];
+    updatedChecklists[checklistIndex].items[itemIndex].checked = !updatedChecklists[checklistIndex].items[itemIndex].checked;
+    setChecklists(updatedChecklists);
+  };
+
+  const deleteItem = (checklistIndex, itemIndex) => {
+    const updatedChecklists = [...checklists];
+    updatedChecklists[checklistIndex].items.splice(itemIndex, 1);
+    setChecklists(updatedChecklists);
+    hideDeletePopup(checklistIndex);
+  };
+
+  const resetItems = (checklistIndex) => {
+    const updatedChecklists = [...checklists];
+    updatedChecklists[checklistIndex].items.forEach((item) => {
+      if (item.checked) {
+        item.checked = false;
+      }
+    });
+    setChecklists(updatedChecklists);
+    hideResetPopup(checklistIndex);
+  };
+
+  const showDeletePopup = (checklistIndex, itemIndex) => {
+    setShowDeleteConfirmation((prev) => {
+      const updatedDeleteConfirmation = [...prev];
+      updatedDeleteConfirmation[checklistIndex] = true;
+      setCurrentItemIndex(itemIndex);
+      return updatedDeleteConfirmation;
+    });
+  };
+
+  const hideDeletePopup = (checklistIndex) => {
+    const updatedDeleteConfirmation = [...showDeleteConfirmation];
+    updatedDeleteConfirmation[checklistIndex] = false;
+    setShowDeleteConfirmation(updatedDeleteConfirmation);
+  };
+
+  const showResetPopup = (checklistIndex) => {
+    const updatedResetConfirmation = [...showResetConfirmation];
+    updatedResetConfirmation[checklistIndex] = true;
+    setShowResetConfirmation(updatedResetConfirmation);
+  };
+
+  const hideResetPopup = (checklistIndex) => {
+    const updatedResetConfirmation = [...showResetConfirmation];
+    updatedResetConfirmation[checklistIndex] = false;
+    setShowResetConfirmation(updatedResetConfirmation);
+  };
 
   return (
     <div className="checklist-container">
       <h1>Checklist App</h1>
-      <div className="input-container">
+
+      <div className="checklist-form">
         <input
           type="text"
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          placeholder="Enter an item"
+          value={currentChecklist}
+          onChange={(e) => setCurrentChecklist(e.target.value)}
+          placeholder="Enter checklist name"
         />
-        <button onClick={addItem}>Add</button>
+        <button onClick={addChecklist}>Create Checklist</button>
       </div>
-      <ul className="checklist">
-        {items.map((item, index) => (
-          <li key={index} className={item.checked ? 'checked' : ''}>
+
+      {checklists.map((checklist, checklistIndex) => (
+        <div key={checklistIndex} className="checklist-wrapper">
+          <h2>{checklist.name}</h2>
+
+          <div className="input-container">
             <input
-              type="checkbox"
-              checked={item.checked}
-              onChange={() => toggleItem(index)}
+              type="text"
+              value={newItemText[checklistIndex]}
+              onChange={(e) => {
+                const updatedText = [...newItemText];
+                updatedText[checklistIndex] = e.target.value;
+                setNewItemText(updatedText);
+              }}
+              placeholder="Enter an item"
             />
-            <span className="item-text">{item.text}</span>
-            <button onClick={() => showDeletePopup(index)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-      <button className="reset-button" onClick={showResetPopup}>
-        Reset
-      </button>
+            <button onClick={() => addItem(checklistIndex)}>Add</button>
+          </div>
 
-      {showDeleteConfirmation && (
-  <div className="popup">
-    <div className="popup-content">
-      <h2>Confirmation</h2>
-      <p>Do you want to delete this task?</p>
-      <div className="popup-buttons">
-        <button onClick={deleteItem}>Yes</button>
-        <button onClick={hideDeletePopup}>No</button>
-      </div>
-    </div>
-  </div>
-)}
+          <ul className="checklist">
+            {checklist.items.map((item, itemIndex) => (
+              <li key={itemIndex} className={item.checked ? 'checked' : ''}>
+                <input
+                  type="checkbox"
+                  checked={item.checked}
+                  onChange={() => toggleItem(checklistIndex, itemIndex)}
+                />
+                <span className="item-text">{item.text}</span>
+                <button onClick={() => showDeletePopup(checklistIndex, itemIndex)}>Delete</button>
+              </li>
+            ))}
+          </ul>
 
-{showResetConfirmation && items.some((item) => item.checked) && (
-  <div className="popup">
-    <div className="popup-content">
-      <h2>Confirmation</h2>
-      <p>Do you want to reset this list?</p>
-      <div className="popup-buttons">
-        <button onClick={resetItems}>Yes</button>
-        <button onClick={hideResetPopup}>No</button>
-      </div>
-    </div>
-  </div>
-)}
+          <button
+            className="reset-button"
+            onClick={() => showResetPopup(checklistIndex)}
+            disabled={!checklist.items.some((item) => item.checked)}
+          >
+            Reset
+          </button>
 
+          {showDeleteConfirmation[checklistIndex] && (
+            <div className="popup">
+              <div className="popup-content">
+                <h2>Confirmation</h2>
+                <p>Do you want to delete this task?</p>
+                <div className="popup-buttons">
+                  <button onClick={() => deleteItem(checklistIndex, currentItemIndex)}>Yes</button>
+                  <button onClick={() => hideDeletePopup(checklistIndex)}>No</button>
+                </div>
+              </div>
+            </div>
+          )}
 
-
+          {showResetConfirmation[checklistIndex] && (
+            <div className="popup">
+              <div className="popup-content">
+                <h2>Confirmation</h2>
+                <p>Do you want to reset this list?</p>
+                <div className="popup-buttons">
+                  <button onClick={() => resetItems(checklistIndex)}>Yes</button>
+                  <button onClick={() => hideResetPopup(checklistIndex)}>No</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };
