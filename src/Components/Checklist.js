@@ -43,6 +43,7 @@ const Checklist = () => {
     setChecklists(updatedChecklists);
     hideDeletePopup(checklistIndex);
   };
+  
 
   const resetItems = (checklistIndex) => {
     const updatedChecklists = [...checklists];
@@ -54,6 +55,8 @@ const Checklist = () => {
     setChecklists(updatedChecklists);
     hideResetPopup(checklistIndex);
   };
+  
+  
 
   const showDeletePopup = (checklistIndex, itemIndex) => {
     setShowDeleteConfirmation((prev) => {
@@ -101,16 +104,16 @@ const Checklist = () => {
           <h2>{checklist.name}</h2>
 
           <div className="input-container">
-            <input
-              type="text"
-              value={newItemText[checklistIndex]}
-              onChange={(e) => {
-                const updatedText = [...newItemText];
-                updatedText[checklistIndex] = e.target.value;
-                setNewItemText(updatedText);
-              }}
-              placeholder="Enter an item"
-            />
+          <input
+  type="text"
+  value={newItemText[checklistIndex]}
+  onChange={(e) => {
+    const updatedText = [...newItemText];
+    updatedText[checklistIndex] = e.target.value;
+    setNewItemText(updatedText);
+  }}
+  placeholder="Enter an item"
+/>
             <button onClick={() => addItem(checklistIndex)}>Add</button>
           </div>
 
@@ -123,31 +126,29 @@ const Checklist = () => {
                   onChange={() => toggleItem(checklistIndex, itemIndex)}
                 />
                 <span className="item-text">{item.text}</span>
-                <button onClick={() => showDeletePopup(checklistIndex, itemIndex)}>Delete</button>
+                <button onClick={() => showDeletePopup(checklistIndex)}>Delete</button>
               </li>
             ))}
           </ul>
 
-          <button
-            className="reset-button"
-            onClick={() => showResetPopup(checklistIndex)}
-            disabled={!checklist.items.some((item) => item.checked)}
-          >
+          <button className="reset-button" onClick={() => showResetPopup(checklistIndex)} disabled={!checklist.items.some((item) => item.checked)}>
             Reset
           </button>
 
+
           {showDeleteConfirmation[checklistIndex] && (
-            <div className="popup">
-              <div className="popup-content">
-                <h2>Confirmation</h2>
-                <p>Do you want to delete this task?</p>
-                <div className="popup-buttons">
-                  <button onClick={() => deleteItem(checklistIndex, currentItemIndex)}>Yes</button>
-                  <button onClick={() => hideDeletePopup(checklistIndex)}>No</button>
-                </div>
-              </div>
-            </div>
-          )}
+  <div className="popup">
+    <div className="popup-content">
+      <h2>Confirmation</h2>
+      <p>Do you want to delete this task?</p>
+      <div className="popup-buttons">
+        <button onClick={() => deleteItem(checklistIndex, currentItemIndex)}>Yes</button>
+        <button onClick={() => hideDeletePopup(checklistIndex)}>No</button>
+      </div>
+    </div>
+  </div>
+)}
+
 
           {showResetConfirmation[checklistIndex] && (
             <div className="popup">
